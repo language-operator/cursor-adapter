@@ -1,4 +1,4 @@
-opencode LanguageAgentRuntime installed.
+Cursor LanguageAgentRuntime installed.
 
 Prerequisite: the `language-operator` chart must be installed first (it provides
 the LanguageAgentRuntime CRD). Installing against a cluster without the CRD fails.
@@ -11,7 +11,7 @@ namespace via spec.runtime:
   metadata:
     name: my-agent
   spec:
-    runtime: opencode
+    runtime: cursor
 
 Image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
 
@@ -20,5 +20,5 @@ http://<agent-name>.<namespace>.svc.cluster.local:{{ .Values.port }}. From a bro
 is reached through the cluster ingress, behind the OIDC proxy when the LanguageCluster
 enables auth.
 
-No interactive login: opencode reaches the model gateway using the provider config
-written to opencode.jsonc at startup.
+Cursor does not use the model gateway: it authenticates to Cursor with a vendor
+key (CURSOR_API_KEY), so spec.models does not apply to agents on this runtime.

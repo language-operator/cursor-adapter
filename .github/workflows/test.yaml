@@ -26,7 +26,7 @@ jobs:
           file: ./Dockerfile
           push: false
           load: true
-          tags: opencode-adapter:test
+          tags: cursor-adapter:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -35,7 +35,7 @@ jobs:
       # and it brings its own probe, so there is no version to keep in step here.
       - name: Extract the conformance suite from the image
         run: |
-          docker run --rm --entrypoint cat opencode-adapter:test \
+          docker run --rm --entrypoint cat cursor-adapter:test \
             /opt/coding-runtime/test/conformance.sh > conformance.sh
           chmod +x conformance.sh
 
@@ -44,9 +44,18 @@ jobs:
       # tmpfs /tmp. Checks doctor, that seeding is idempotent and writes nothing
       # outside /tmp and /workspace, the probe endpoints, manifest redaction, the
       # cross-origin WebSocket guard, and that a keystroke reaches the program
-      # under tmux. No tolerated failures.
+      # under tmux.
+      #
+      # CONFORMANCE_SKIP declares the one check Cursor cannot pass: it greps the
+      # tmux pane for typed text, and Cursor without CURSOR_API_KEY sits on its
+      # sign-in screen, which renders none of it. The suite still runs the check
+      # and fails this job if it starts passing — or if the declaration ever stops
+      # matching a real check — so the declaration cannot outlive what justifies
+      # it. See Makefile.
       - name: Run conformance suite
-        run: ./conformance.sh opencode-adapter:test adapter
+        env:
+          CONFORMANCE_SKIP: a keystroke reaches the program under tmux
+        run: ./conformance.sh cursor-adapter:test adapter
 
   chart-lint:
     runs-on: ubuntu-latest
@@ -63,4 +72,4 @@ jobs:
         run: helm lint chart
 
       - name: Template chart
-        run: helm template opencode chart
+        run: helm template cursor chart
