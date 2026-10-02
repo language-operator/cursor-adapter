@@ -49,7 +49,11 @@ it.
 - `make test` — builds the image and runs coding-runtime's conformance suite in `adapter`
   mode. The suite is **extracted from the image under test**, so the checks always match
   the runtime being checked; it runs the container the way the operator does (read-only
-  root, uid 1000, all capabilities dropped). Needs Docker.
+  root, uid 1000, all capabilities dropped). Needs Docker. One check is declared in
+  `CONFORMANCE_SKIP` (Makefile and `test.yaml`): "a keystroke reaches the program under
+  tmux", because Cursor without `CURSOR_API_KEY` sits on a sign-in screen that echoes
+  nothing. The suite fails if that check ever starts passing, so remove the declaration
+  then.
 - `make lint-chart` — `helm lint chart` plus `helm template cursor chart`.
 - There is **no linter and no unit-test suite**. CI correctness is exactly the two
   `test.yaml` jobs: `image-test` and `chart-lint`.
