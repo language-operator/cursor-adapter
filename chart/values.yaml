@@ -16,6 +16,19 @@ image:
 auth:
   enabled: true
 
+# Cursor authenticates to Cursor itself, with CURSOR_API_KEY — it does not go
+# through the model gateway. Name a Secret here to declare the key for every
+# agent on this runtime: the Secret must exist in each agent's namespace and hold
+# a key literally named CURSOR_API_KEY (the operator mounts the whole Secret with
+# envFrom). Left empty, nothing is declared, and each agent either sets
+# spec.credentials itself or signs in interactively in its terminal
+# (`agent login`), which persists on the workspace volume.
+#
+# Off by default on purpose: a runtime-level Secret that is missing from an
+# agent's namespace stops that agent's pod from starting.
+credentials:
+  apiKeySecret: ""
+
 # HTTP port the WebSocket terminal server listens on. Injected as PORT, so it
 # moves the listener and the Service together.
 port: 8080

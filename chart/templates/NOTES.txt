@@ -21,4 +21,14 @@ is reached through the cluster ingress, behind the OIDC proxy when the LanguageC
 enables auth.
 
 Cursor does not use the model gateway: it authenticates to Cursor with a vendor
-key (CURSOR_API_KEY), so spec.models does not apply to agents on this runtime.
+key, so spec.models does not apply to agents on this runtime.
+{{- if .Values.credentials.apiKeySecret }}
+
+CURSOR_API_KEY comes from the Secret "{{ .Values.credentials.apiKeySecret }}", which must exist
+in each agent's namespace with a key named CURSOR_API_KEY.
+{{- else }}
+
+No CURSOR_API_KEY is declared. Give each agent one through spec.credentials
+(valueFrom a Secret holding a CURSOR_API_KEY key), or sign in interactively in
+the agent's terminal. Task-mode agents need the key: nobody is there to sign in.
+{{- end }}

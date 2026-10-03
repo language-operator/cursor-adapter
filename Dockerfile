@@ -10,7 +10,7 @@
 # `requires.codingRuntime` range can satisfy, so every boot would warn about a
 # version mismatch that is not real.
 # -----------------------------------------------------------------------------
-ARG BASE=ghcr.io/language-operator/coding-runtime:0.1.4@sha256:2f31ef9b04e72bec3a4bb79db59a82a4aa74f89538cfc118d75e0a852734b0aa
+ARG BASE=ghcr.io/language-operator/coding-runtime:0.1.6@sha256:318a540d9d062689d3ed6c0de34fb353ff076bb16c5770bcf296398c6e5a5412
 ARG CURSOR_VERSION=2026.10.01-e373342
 ARG CURSOR_SHA256_AMD64=a79726c6e644520e993970be4c45775a6889802b67abe461a677a53219ae28e8
 ARG CURSOR_SHA256_ARM64=785c5f6bf2a60eb1121e27ed8c14f5ee07ed1b5b6692324f2d9a997238245eb5
@@ -43,12 +43,14 @@ RUN set -eu; \
     ln -s /opt/cursor-agent/cursor-agent /usr/local/bin/agent; \
     ln -s /opt/cursor-agent/cursor-agent /usr/local/bin/cursor-agent
 
-# runtime.json  — what this adapter is: config dir, serving surface, tmux launch.
-# emit.mjs      — normalized operator config -> Cursor's config.
-# launch-cursor — what tmux runs inside the terminal.
+# runtime.json       — what this adapter is: config dir, serving surface, tmux launch.
+# emit.mjs           — normalized operator config -> Cursor's config.
+# launch-cursor      — what tmux runs inside the terminal (service mode).
+# launch-cursor-task — the headless run for spec.execution.mode: task.
 COPY runtime.json /etc/coding-runtime/runtime.json
 COPY emit.mjs /opt/adapter/emit.mjs
 COPY --chmod=755 launch-cursor.sh /usr/local/bin/launch-cursor
+COPY --chmod=755 launch-cursor-task.sh /usr/local/bin/launch-cursor-task
 
 # The operator pins the agent container to uid 1000 with no override, and the
 # base already has a matching passwd entry. Do not create a user here.

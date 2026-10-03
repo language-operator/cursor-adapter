@@ -14,9 +14,18 @@ spec:
   # sole auth gate. When the cluster enables auth, agents using this runtime sit
   # behind the injected oauth2-proxy sidecar. Cursor itself does not go through
   # the model gateway: it authenticates to Cursor with a vendor key
-  # (CURSOR_API_KEY), whose wiring is language-operator/cursor-adapter#1.
+  # (CURSOR_API_KEY). See credentials.apiKeySecret in values.yaml.
   auth:
     enabled: {{ .Values.auth.enabled }}
+  {{- with .Values.credentials.apiKeySecret }}
+
+  # Always with valueFrom: a credential declared by name alone is filled by the
+  # operator with a random value, which Cursor would reject as an invalid key.
+  credentials:
+    - name: CURSOR_API_KEY
+      valueFrom:
+        name: {{ . }}
+  {{- end }}
 
   ports:
     - name: http
