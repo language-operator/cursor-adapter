@@ -14,7 +14,7 @@ It is a **thin layer over
 [`coding-runtime`](https://github.com/language-operator/coding-runtime)**. The base owns
 the OS layer, the web terminal (node-pty over a WebSocket, with a cross-origin guard and
 a keepalive), `tini`, and the ETL that turns the operator's `/etc/agent/config.yaml` into
-a normalized config. This repo adds the Cursor CLI plus three files that describe it to
+a normalized config. This repo adds the Cursor CLI plus the files that describe it to
 the base.
 
 Cursor is a **vendor-key runtime**: it authenticates with `CURSOR_API_KEY` and has no
@@ -34,12 +34,23 @@ it.
   script: it unpacks into `$HOME`, which the base relocates at runtime. `ARG BASE` pins the
   base by **tag and digest**, and is the only place the base version appears.
 - `runtime.json` — the manifest: config goes in `$STATE_DIR/cursor`, exported as
-  `CURSOR_CONFIG_DIR` (which Cursor honours); the serving surface; how tmux launches the
-  TUI. This repo's own — coding-runtime has no `examples/cursor/` to copy it from.
-- `emit.mjs` — the emitter. Currently a placeholder that manages an empty `mcp.json`; the
-  real translation (MCP servers, rules, vendor key) is issue #1.
-- `launch-cursor.sh` — what tmux runs: `exec agent` in the project directory. Resume after
-  sleep/wake is not handled yet (#1).
+  `CURSOR_CONFIG_DIR` (which Cursor honours, and where it keeps its chats); the serving
+  surface; how tmux launches the TUI; `task.exec` for task mode, which needs base 0.1.5+.
+  This repo's own — coding-runtime has no `examples/cursor/` to copy it from.
+- `emit.mjs` — the emitter. MCP servers go to `$HOME/.cursor/mcp.json`: that path is
+  hard-coded in Cursor (it ignores `CURSOR_CONFIG_DIR` for MCP), and global servers need
+  no approval where a project's `.cursor/mcp.json` would. Headers are `${env:NAME}`
+  references, never values. The persona is a whole-file rule at
+  `/workspace/.cursor/rules/langop-persona.mdc` — a `contents` write, which cannot be
+  deleted, so a removed persona becomes a rule with `alwaysApply: false`.
+- `launch-cursor.sh` — service mode, what tmux runs. Passes `--continue` only once
+  `$CURSOR_CONFIG_DIR/chats/<md5 of pwd -P>/` holds a chat: with none, Cursor exits 1 and
+  the pane is dead. Otherwise sends the instructions as the opening message.
+- `launch-cursor-task.sh` — task mode: `agent -p --force` with the instructions (plus
+  any event payload) as the prompt; Cursor's exit code is the run's outcome.
+- Both launchers pass `--trust` (no trust dialog), `--disable-auto-update` (a hidden
+  flag; the CLI otherwise updates itself into `$HOME`), and `--model "$CURSOR_MODEL"`
+  when set. `spec.models` does not apply.
 - `chart/` — the Helm chart registering the cluster-scoped `LanguageAgentRuntime` named
   `cursor`.
 - `.github/workflows/` — `test.yaml`, `build-image.yaml`, `release-chart.yaml`.

@@ -14,5 +14,6 @@
     "cwd": "${WORKDIR}",
     "wsPath": "/ws",
     "keepaliveSeconds": 25
-  }
+  },
+  "task": { "exec": ["launch-cursor-task"] }
 }

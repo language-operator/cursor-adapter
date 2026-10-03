@@ -43,12 +43,14 @@ RUN set -eu; \
     ln -s /opt/cursor-agent/cursor-agent /usr/local/bin/agent; \
     ln -s /opt/cursor-agent/cursor-agent /usr/local/bin/cursor-agent
 
-# runtime.json  — what this adapter is: config dir, serving surface, tmux launch.
-# emit.mjs      — normalized operator config -> Cursor's config.
-# launch-cursor — what tmux runs inside the terminal.
+# runtime.json       — what this adapter is: config dir, serving surface, tmux launch.
+# emit.mjs           — normalized operator config -> Cursor's config.
+# launch-cursor      — what tmux runs inside the terminal (service mode).
+# launch-cursor-task — the headless run for spec.execution.mode: task.
 COPY runtime.json /etc/coding-runtime/runtime.json
 COPY emit.mjs /opt/adapter/emit.mjs
 COPY --chmod=755 launch-cursor.sh /usr/local/bin/launch-cursor
+COPY --chmod=755 launch-cursor-task.sh /usr/local/bin/launch-cursor-task
 
 # The operator pins the agent container to uid 1000 with no override, and the
 # base already has a matching passwd entry. Do not create a user here.
